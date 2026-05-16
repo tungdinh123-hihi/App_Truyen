@@ -10,6 +10,7 @@ Danh sách thành viên :
 - Đinh Quang Tùng - Msv: 23810310337
 - Vũ Minh Đạt - Msv: 23810310341
 - Nguyễn Bá Đông - Msv: 23810310335
+
 Công nghệ sử dụng :
 - React Native
 - JavaScript
@@ -39,3 +40,12 @@ Cách 3 (Trên máy ảo): Bấm phím a cho máy ảo Android hoặc phím i ch
 Tài khoản Demo:
 - Gmail: tung@Gmail.com
 - Mật khẩu : 123456
+Ảnh minh hoạ:
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
+![alt text](image-5.png)
+![alt text](image-6.png)
+Link Video Demo: https://drive.google.com/drive/folders/1jo7UoiFST8nNbewc03xJoTrvOEwoIV_x
