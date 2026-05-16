@@ -1,6 +1,6 @@
-##Tên đề tài : Ứng dụng đọc truyện ngắn
+## Tên đề tài : Ứng dụng đọc truyện ngắn
 
-##Giới thiệu:
+## Giới thiệu:
 Ứng dụng Đọc truyện ngắn là một nền tảng di động đa hệ điều hành được xây dựng trên hệ sinh thái React Native và Expo. Ứng dụng tập trung tối ưu hóa trải nghiệm cá nhân hóa của độc giả, quản lý bộ nhớ hệ thống một cách khoa học thông qua hệ thống tính năng toàn diện:
 1. Tính năng cơ bản
 * **Đăng nhập / Đăng ký:** Cổng xác thực an toàn bằng tài khoản Email và Mật khẩu, cho phép người dùng khởi tạo không gian đọc sách cá nhân và lưu trữ dữ liệu riêng biệt.
@@ -18,17 +18,17 @@
 * **Tối ưu hóa bộ nhớ điều hướng (`navigation.replace`):** Cơ chế chuyển chương truyện bằng cách thay thế màn hình cũ thay vì xếp chồng (Stack Push), giúp thiết bị luôn giải phóng RAM sạch sẽ dù độc giả có đọc liên tiếp hàng trăm chương truyện.
 * **Lưu lịch sử đọc tự động (Background Auto-Tracking):** Sử dụng các hiệu ứng vòng đời ngầm để ghi nhận tiến độ đọc truyện của người dùng vào Context trung tâm ngay khi họ tương tác mà không cần thao tác thủ công.
 
-##Danh sách thành viên : 
+## Danh sách thành viên : 
 - Đinh Quang Tùng - Msv: 23810310337
 - Vũ Minh Đạt - Msv: 23810310341
 - Nguyễn Bá Đông - Msv: 23810310335
 
-##Phân công công việc :
+## Phân công công việc :
 Đinh Quang Tùng : Phụ trách giao diện Home, hiển thị danh sách truyện, trang chi tiết truyện và chức năng đọc truyện/chương, logic điều hướng , AuthContext.
 Vũ Minh Đạt : Phụ trách chức năng đăng nhập, đăng ký tài khoản, quản lý thông tin cá nhân và đăng xuất.
 Nguyễn Bá Đông :Phụ trách chức năng tìm kiếm truyện, quản lý truyện yêu thích và lịch sử đọc truyện.
 
-##Công nghệ sử dụng :
+## Công nghệ sử dụng :
 - React Native
 - JavaScript
 - React Context API
@@ -36,7 +36,7 @@ Nguyễn Bá Đông :Phụ trách chức năng tìm kiếm truyện, quản lý 
 - Platform API
 - Git
 
-##Hướng dẫn cài đặt
+## Hướng dẫn cài đặt
 Yêu cầu máy tính đã cài đặt sẵn **Node.js (LTS)**.
 1. **Cloning dự án từ Github về máy:**
 
@@ -46,7 +46,7 @@ Yêu cầu máy tính đã cài đặt sẵn **Node.js (LTS)**.
 2. **Cài đặt các thư viện phụ thuộc**
     npm install
 
-##Hướng dẫn chạy project
+## Hướng dẫn chạy project
 1. Tại thư mục dự án chạy lệnh:
 npx expo start
 2. Xem ứng dụng
@@ -56,7 +56,7 @@ Mở camera điện thoại quét mã QR Code hiển thị trên màn hình Term
 Cách 2 (Trên trình duyệt Web): Bấm phím w tại Terminal máy tính để mở giao diện Web di động.
 Cách 3 (Trên máy ảo): Bấm phím a cho máy ảo Android hoặc phím i cho máy ảo iPhone.
 
-##Tài khoản Demo:
+## Tài khoản Demo:
 - Gmail: tung@Gmail.com
 - Mật khẩu : 123456
 
@@ -69,4 +69,5 @@ Cách 3 (Trên máy ảo): Bấm phím a cho máy ảo Android hoặc phím i ch
 ![alt text](image-5.png)
 ![alt text](image-6.png)
 
-##Link Video Demo: https://drive.google.com/drive/folders/1jo7UoiFST8nNbewc03xJoTrvOEwoIV_x
+## Link Video Demo: https://drive.google.com/drive/folders/1jo7UoiFST8nNbewc03xJoTrvOEwoIV_x
+## Link Deploy: https://app-end.vercel.app/
