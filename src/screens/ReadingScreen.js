@@ -3,16 +3,40 @@ import { useAuth } from '../context/AuthContext';
 import { 
   View, Text, StyleSheet, ScrollView, 
   TouchableOpacity, SafeAreaView, StatusBar, 
-  FlatList 
+  FlatList, 
+  Platform 
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 import { CHAPTER_CONTENTS, STORIES } from '../data/mockData';
 
+const FONT_FAMILIES = [
+  { id: Platform.OS === 'ios' ? 'Georgia' : 'serif', name: 'Có chân (Serif)' },
+  { id: Platform.OS === 'ios' ? 'Helvetica' : 'normal', name: 'Mặc định (Sans)' },
+  { id: Platform.OS === 'ios' ? 'Courier' : 'monospace', name: 'Đơn cách (Mono)' }
+];
+
 const ReadingScreen = ({ route, navigation }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [fontPanelVisible, setFontPanelVisible] = useState(false);
+  const [fontSize, setFontSize] = useState(18); 
+  
+  const [fontFamily, setFontFamily] = useState(Platform.OS === 'ios' ? 'Georgia' : 'serif');
+  // 1. Tạo một State để kiểm tra chương này đã tải chưa
+const [isDownloaded, setIsDownloaded] = useState(false);
 
-  // 1. TÌM ID CHƯƠNG HIỆN TẠI MỘT CÁCH CHÍNH XÁC
+// 2. Hàm xử lý khi bấm nút Đám mây
+const handleDownloadOffline = async () => {
+  try {
+    // Lưu toàn bộ cục nội dung chapter vào máy theo ID
+    await AsyncStorage.setItem(`@offline_chapter_${currentChapterId}`, JSON.stringify(chapter));
+    setIsDownloaded(true);
+    alert("Đã tải chương này để đọc ngoại tuyến!");
+  } catch (error) {
+    console.log("Lỗi tải truyện", error);
+  }
+};
+  // Tìm ID chương hiện tại
   let initialChapterId = route?.params?.chapterId;
   let chapter = null;
   let currentChapterId = initialChapterId;
@@ -20,7 +44,6 @@ const ReadingScreen = ({ route, navigation }) => {
   if (CHAPTER_CONTENTS && typeof CHAPTER_CONTENTS === 'object') {
     const keys = Object.keys(CHAPTER_CONTENTS);
     if (keys.length > 0) {
-      // Nếu không có chapterId truyền vào, mặc định lấy chương đầu tiên
       if (!initialChapterId) {
         currentChapterId = keys[0]; 
       }
@@ -28,22 +51,27 @@ const ReadingScreen = ({ route, navigation }) => {
     }
   }
 
-  // 2. TÌM TRUYỆN ĐỂ LẤY DANH SÁCH CHƯƠNG & XỬ LÝ NÚT NEXT/PREV
+  // Tìm truyện và danh sách chương để xử lý nút bấm Next/Prev
   const currentStory = STORIES && STORIES.find(s => s.title === chapter?.bookName);
   const chapterList = currentStory ? currentStory.chaptersList : [];
 
-  // Tìm vị trí (index) của chương hiện tại trong danh sách
   const currentChapterIndex = chapterList.findIndex(c => c.id === currentChapterId);
   const prevChapter = currentChapterIndex > 0 ? chapterList[currentChapterIndex - 1] : null;
   const nextChapter = currentChapterIndex < chapterList.length - 1 ? chapterList[currentChapterIndex + 1] : null;
 
-  // 3. TỰ ĐỘNG LƯU LỊCH SỬ
+  // Tự động lưu lịch sử đọc truyện
   const { addToHistory } = useAuth();
   useEffect(() => {
     if (currentStory && currentStory.id && route.params?.chapterId) {
       addToHistory(currentStory.id);
     }
   }, [currentStory]);
+
+  // Hàm tăng/giảm kích thước chữ
+  const adjustFontSize = (type) => {
+    if (type === 'increase' && fontSize < 30) setFontSize(fontSize + 2);
+    if (type === 'decrease' && fontSize > 14) setFontSize(fontSize - 2);
+  };
 
   if (!chapter) {
     return (
@@ -65,7 +93,7 @@ const ReadingScreen = ({ route, navigation }) => {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor="#1A1A1A" />
       
-      {/* HEADER CONTAINER */}
+      {/* HEADER BAR */}
       <View style={styles.headerContainer}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerIcon}>
@@ -74,7 +102,10 @@ const ReadingScreen = ({ route, navigation }) => {
           
           <TouchableOpacity 
             style={styles.headerTitleContainer} 
-            onPress={() => setDropdownVisible(!dropdownVisible)}
+            onPress={() => {
+              setDropdownVisible(!dropdownVisible);
+              setFontPanelVisible(false); 
+            }}
             activeOpacity={0.7}
           >
             <Text style={styles.headerTitle}>
@@ -85,16 +116,27 @@ const ReadingScreen = ({ route, navigation }) => {
           </TouchableOpacity>
 
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.headerIcon}>
-              <Ionicons name="cloud-offline-outline" size={24} color="#FFF" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.headerIcon}>
-              <Text style={styles.fontSettingText}>Aa</Text>
+            <TouchableOpacity onPress={handleDownloadOffline} style={styles.headerIcon}>
+  <Ionicons 
+    name={isDownloaded ? "cloud-done" : "cloud-offline-outline"} 
+    size={24} 
+    color={isDownloaded ? "#FF500A" : "#FFF"} 
+  />
+</TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.headerIcon} 
+              onPress={() => {
+                setFontPanelVisible(!fontPanelVisible);
+                setDropdownVisible(false); 
+              }}
+            >
+              <Text style={[styles.fontSettingText, fontPanelVisible && { color: '#FF500A' }]}>Aa</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* DROPDOWN XỔ XUỐNG */}
+        {/* DROPDOWN DANH SÁCH CHƯƠNG */}
         {dropdownVisible && (
           <View style={styles.dropdownWrapper}>
             <TouchableOpacity 
@@ -108,7 +150,7 @@ const ReadingScreen = ({ route, navigation }) => {
                 keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={true}
                 renderItem={({ item }) => {
-                  const isActive = item.id === currentChapterId; // Cập nhật so sánh chính xác
+                  const isActive = item.id === currentChapterId;
                   return (
                     <TouchableOpacity
                       style={[styles.chapterItem, isActive && styles.activeChapterItem]}
@@ -133,9 +175,9 @@ const ReadingScreen = ({ route, navigation }) => {
         )}
       </View>
 
-      {/* NỘI DUNG ĐỌC */}
+      {/* NỘI DUNG CHỮ TRUYỆN */}
       <ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
-        <Text style={styles.mainTitle}>{chapter.chapterName}</Text>
+        <Text style={[styles.mainTitle, { fontFamily: fontFamily }]}>{chapter.chapterName}</Text>
         
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
@@ -151,16 +193,26 @@ const ReadingScreen = ({ route, navigation }) => {
             <Text style={styles.statText}>{chapter.comments}</Text>
           </View>
         </View>
-        {/* <Text style={styles.paragraphText}>{chapter.content}</Text> */}
+
         <View style={styles.paragraphsContainer}>
           {chapter.paragraphs && chapter.paragraphs.map((text, index) => (
-            <Text key={index} style={styles.paragraphText}>
+            <Text 
+              key={index} 
+              style={[
+                styles.paragraphText, 
+                { 
+                  fontSize: fontSize, 
+                  fontFamily: fontFamily, 
+                  lineHeight: fontSize * 1.55 
+                }
+              ]}
+            >
               {text}
             </Text>
           ))}
         </View>
         
-        {/* CẬP NHẬT: THANH ĐIỀU HƯỚNG CHƯƠNG (Chương trước / Chương sau) */}
+        {/* NÚT CHUYỂN CHƯƠNG PREV / NEXT */}
         <View style={styles.chapterNavigation}>
           <TouchableOpacity 
             style={[styles.navButton, !prevChapter && styles.navButtonDisabled]}
@@ -184,7 +236,47 @@ const ReadingScreen = ({ route, navigation }) => {
         <View style={{ height: 60 }} /> 
       </ScrollView>
 
-      {/* BOTTOM BAR */}
+      {/* BẢNG TÙY CHỈNH FONT CHỮ (FONT PANEL) */}
+      {fontPanelVisible && (
+        <View style={styles.fontPanelContainer}>
+          {/* Tùy chỉnh Kích thước */}
+          <View style={styles.panelRow}>
+            <Text style={styles.panelLabel}>Kích cỡ</Text>
+            <View style={styles.sizeControlGroup}>
+              <TouchableOpacity style={styles.sizeBtn} onPress={() => adjustFontSize('decrease')}>
+                <Text style={styles.sizeBtnText}>A-</Text>
+              </TouchableOpacity>
+              <Text style={styles.sizeValueText}>{fontSize}</Text>
+              <TouchableOpacity style={styles.sizeBtn} onPress={() => adjustFontSize('increase')}>
+                <Text style={styles.sizeBtnText}>A+</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Tùy chỉnh Kiểu chữ */}
+          <View style={styles.panelRow}>
+            <Text style={styles.panelLabel}>Kiểu chữ</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fontFamilyGroup}>
+              {FONT_FAMILIES.map((f) => {
+                const isSelected = fontFamily === f.id;
+                return (
+                  <TouchableOpacity 
+                    key={f.id} 
+                    style={[styles.fontFamilyBtn, isSelected && styles.fontFamilyBtnActive]}
+                    onPress={() => setFontFamily(f.id)}
+                  >
+                    <Text style={[styles.fontFamilyBtnText, isSelected && styles.fontFamilyBtnTextActive, { fontFamily: f.id }]}>
+                      {f.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      )}
+
+      {/* BOTTOM TAB BAR */}
       <View style={styles.bottomBar}>
         <TouchableOpacity style={styles.bottomTab}>
           <Ionicons name="star-outline" size={24} color="#FF6B00" />
@@ -200,14 +292,11 @@ const ReadingScreen = ({ route, navigation }) => {
           <Ionicons name="share-outline" size={24} color="#FF6B00" />
           <Text style={styles.bottomTabTextActive}>Chia sẻ</Text>
         </TouchableOpacity>
-        
-        
       </View>
     </SafeAreaView>
   );
 };
 
-// --- STYLES ---
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#1A1A1A' },
   headerContainer: { zIndex: 100 },
@@ -227,14 +316,13 @@ const styles = StyleSheet.create({
   activeChapterText: { color: '#FF500A', fontWeight: 'bold' },
   chapterItemDate: { color: '#666', fontSize: 13 },
   contentContainer: { flex: 1, backgroundColor: '#FFFFFF' },
-  mainTitle: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginTop: 30, marginBottom: 20, color: '#333', fontFamily: 'serif' },
+  mainTitle: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginTop: 30, marginBottom: 20, color: '#333' },
   statsRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 40, gap: 24 },
   statItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   statText: { color: '#888', fontSize: 13 },
   paragraphsContainer: { paddingHorizontal: 20 },
-  paragraphText: { fontSize: 18, lineHeight: 28, color: '#222', fontFamily: 'serif', marginBottom: 24 },
+  paragraphText: { color: '#222', marginBottom: 24 },
   
-  // STYLE NÚT ĐIỀU HƯỚNG CHƯƠNG MỚI THÊM
   chapterNavigation: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 10, paddingBottom: 20 },
   navButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FF500A', paddingVertical: 12, paddingHorizontal: 20, borderRadius: 25, elevation: 2 },
   navButtonDisabled: { backgroundColor: '#F0F0F0' },
@@ -244,6 +332,19 @@ const styles = StyleSheet.create({
   bottomBar: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#FFFFFF', borderTopWidth: 1, borderTopColor: '#EEEEEE', paddingVertical: 10, paddingBottom: 20 },
   bottomTab: { alignItems: 'center', justifyContent: 'center' },
   bottomTabTextActive: { color: '#A0A0A0', fontSize: 12, marginTop: 4 },
+
+  fontPanelContainer: { backgroundColor: '#1A1A1A', padding: 16, borderTopWidth: 1, borderTopColor: '#333', borderTopLeftRadius: 16, borderTopRightRadius: 16, position: 'absolute', bottom: 75, left: 0, right: 0, zIndex: 99 },
+  panelRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 10, justifyContent: 'space-between' },
+  panelLabel: { color: '#AAA', fontSize: 14, fontWeight: '500', width: 70 },
+  sizeControlGroup: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2A2A2A', borderRadius: 8, padding: 4 },
+  sizeBtn: { paddingVertical: 6, paddingHorizontal: 16, backgroundColor: '#333', borderRadius: 6 },
+  sizeBtnText: { color: '#FFF', fontSize: 14, fontWeight: 'bold' },
+  sizeValueText: { color: '#FFF', fontSize: 16, fontWeight: 'bold', marginHorizontal: 16, minWidth: 20, textAlign: 'center' },
+  fontFamilyGroup: { flexDirection: 'row', gap: 10, paddingLeft: 4 },
+  fontFamilyBtn: { paddingVertical: 8, paddingHorizontal: 12, backgroundColor: '#2A2A2A', borderRadius: 8, borderWidth: 1, borderColor: '#333' },
+  fontFamilyBtnActive: { backgroundColor: '#FF500A', borderColor: '#FF500A' },
+  fontFamilyBtnText: { color: '#CCC', fontSize: 14 },
+  fontFamilyBtnTextActive: { color: '#FFF', fontWeight: 'bold' }
 });
 
 export default ReadingScreen;

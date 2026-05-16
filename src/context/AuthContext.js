@@ -7,9 +7,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [history, setHistory] = useState([]);
-  // THÊM STATE: Quản lý danh sách ID truyện yêu thích
   const [favorites, setFavorites] = useState([]);
-
+  
   useEffect(() => {
     const loadData = async () => {
       try {
